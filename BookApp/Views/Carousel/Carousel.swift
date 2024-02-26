@@ -15,6 +15,9 @@ struct Carousel: View {
     private var onIndexChanged: ((Int) -> Void)?
     private let itemWidth: CGFloat
     
+    // Animation duration in seconds
+    private let animationDuration: Double = 0.3
+    
     // MARK: - Initialization
     init(itemWidth: CGFloat, views: [CarouselItem], onIndexChanged: ((Int) -> Void)? = nil) {
         self.itemWidth = itemWidth
@@ -34,21 +37,28 @@ struct Carousel: View {
                         .gesture(gesture)
                 }
             }
+            .animation(
+                .linear(duration: animationDuration),
+                value: UUID()
+            )
         }
     }
     
     // MARK: - Private
     private var gesture: some Gesture {
         DragGesture()
+            .updating($dragOffset) { value, dragOffset, _ in
+                dragOffset = value.translation.width
+            }
             .onEnded { value in
                 let threshold: CGFloat = 50
                 if value.translation.width > threshold {
-                    withAnimation {
+                    withAnimation(.linear(duration: animationDuration)) {
                         currentIndex = max(0, currentIndex - 1)
                         onIndexChanged?(currentIndex)
                     }
                 } else if value.translation.width < -threshold {
-                    withAnimation {
+                    withAnimation(.linear(duration: animationDuration)) {
                         currentIndex = min(views.count - 1, currentIndex + 1)
                         onIndexChanged?(currentIndex)
                     }
