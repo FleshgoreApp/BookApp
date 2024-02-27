@@ -26,32 +26,30 @@ extension MainView {
         ) {
             self.network = network
             self.coordinator = coordinator
-            fetch()
+            
+            // Fetch data asynchronously
+            Task {
+                await fetch()
+            }
         }
         
         // MARK: - Open
-        func fetch() {
-            network?.fetchDataFor(
-                key: "json_data",
-                decodeTo: Books.self
-            ) { [weak self] result in
+        @MainActor
+        func fetch() async {
+            do {
+                let data = try await network?.fetchDataFor(key: "json_data", decodeTo: Books.self)
                 
-                switch result {
-                case .success(let success):
-                    DispatchQueue.main.async {
-                        self?.banners = success.topBannerSlides
-                        self?.books = success.books?.compactMap { BookModel(book: $0) }
-                        self?.recommendationIDs = success.youWillLikeSection
-                        if let books = self?.books {
-                            self?.sections = self?.getGroupedData(from: books)
-                        }
-                    }
-                case .failure(let failure):
-                    switch failure {
-                    case .decodeError:
-                        print(failure.errorDescription) //Handle error
-                    case .remoteConfigFetchError:
-                        print(failure.errorDescription) //Handle error
+                self.banners = data?.topBannerSlides
+                self.books = data?.books?.compactMap { BookModel(book: $0) }
+                self.recommendationIDs = data?.youWillLikeSection
+                if let books = self.books {
+                    self.sections = self.getGroupedData(from: books)
+                }
+            } catch {
+                if let error = error as? RCError {
+                    switch error {
+                    case .decodeError, .remoteConfigFetchError:
+                        print(error.errorDescription) // Handle error
                     }
                 }
             }

@@ -42,7 +42,7 @@ struct MainView: View {
         .listStyle(.plain)
         .scrollIndicators(.hidden)
         .refreshable {
-            viewModel.fetch()
+            await viewModel.fetch()
         }
         .toolbar {
             ToolbarItem(placement: .navigation) {

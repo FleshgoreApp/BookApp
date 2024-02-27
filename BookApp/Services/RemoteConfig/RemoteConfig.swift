@@ -19,22 +19,21 @@ final class RemoteConfigManager: NetworkManager {
     }
     
     // MARK: - NetworkManager protocol
-    func fetchDataFor<D: Decodable>(key: String, decodeTo: D.Type, completion: @escaping (Result<D, RCError>) -> Void) {
-        remoteConfig.fetch { [weak self] status, error -> Void in
-            if status == .success {
-                self?.remoteConfig.activate { _,_ in
-                    let rcValue = RemoteConfig.remoteConfig().configValue(forKey: key)
-                    let data = rcValue.dataValue
-                    do {
-                        let response = try JSONDecoder().decode(D.self, from: data)
-                        completion(.success(response))
-                    } catch {
-                        completion(.failure(.decodeError))
-                    }
-                }
-            } else {
-                completion(.failure(.remoteConfigFetchError))
-            }
+    func fetchDataFor<D: Decodable>(key: String, decodeTo: D.Type) async throws -> D {
+        let status = try await remoteConfig.fetch()
+        guard status == .success else {
+            throw RCError.remoteConfigFetchError
+        }
+        
+        let _ = try await remoteConfig.activate()
+        
+        let rcValue = RemoteConfig.remoteConfig().configValue(forKey: key).dataValue
+        
+        do {
+            let response = try JSONDecoder().decode(D.self, from: rcValue)
+            return response
+        } catch {
+            throw RCError.decodeError
         }
     }
     

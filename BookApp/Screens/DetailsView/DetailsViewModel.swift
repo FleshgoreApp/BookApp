@@ -33,38 +33,34 @@ extension DetailsView {
             self.selectedBook = book
             self.recommendationIDs = recommendationIDs
             self.statisticBarItems = book.statisticBarItems
-            fetch()
+            
+            // Fetch data asynchronously
+            Task {
+                await fetch()
+            }
         }
         
         // MARK: - Open
-        func fetch() {
-            network?.fetchDataFor(
-                key: "details_carousel",
-                decodeTo: CarouselDetails.self
-            ) { [weak self] result in
+        @MainActor
+        func fetch() async {
+            do {
+                let data = try await network?.fetchDataFor(key: "details_carousel", decodeTo: CarouselDetails.self)
                 
-                switch result {
-                case .success(let success):
-                    DispatchQueue.main.async {
-                        
-                        var temp = success.books
-                        
-                        if let index = temp?.firstIndex(where: { $0.id == self?.selectedBook.id }),
-                           let book = temp?.remove(at: index) {
-                            
-                            temp?.insert(book, at: .zero)
-                        }
-                        
-                        self?.books = temp?.compactMap { BookModel(book: $0) }
-                        
-                        self?.recommendationSection = self?.getRecommendations(ids: self?.recommendationIDs, books: self?.books)
-                    }
-                case .failure(let failure):
-                    switch failure {
-                    case .decodeError:
-                        print(failure.errorDescription) //Handle error
-                    case .remoteConfigFetchError:
-                        print(failure.errorDescription) //Handle error
+                var temp = data?.books
+                
+                if let index = temp?.firstIndex(where: { $0.id == self.selectedBook.id }),
+                   let book = temp?.remove(at: index) {
+                    
+                    temp?.insert(book, at: .zero)
+                }
+                
+                self.books = temp?.compactMap { BookModel(book: $0) }
+                self.recommendationSection = self.getRecommendations(ids: self.recommendationIDs, books: self.books)
+            } catch {
+                if let error = error as? RCError {
+                    switch error {
+                    case .decodeError, .remoteConfigFetchError:
+                        print(error.errorDescription) // Handle error
                     }
                 }
             }

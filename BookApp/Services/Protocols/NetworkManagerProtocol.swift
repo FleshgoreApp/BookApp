@@ -8,5 +8,5 @@
 import Foundation
 
 protocol NetworkManager: AnyObject {
-    func fetchDataFor<D: Decodable>(key: String, decodeTo: D.Type, completion: @escaping (Result<D, RCError>) -> Void)
+    func fetchDataFor<D: Decodable>(key: String, decodeTo: D.Type) async throws -> D
 }
