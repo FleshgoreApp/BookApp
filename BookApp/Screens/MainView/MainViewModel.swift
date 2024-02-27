@@ -22,7 +22,7 @@ extension MainView {
         // MARK: - Initialization
         init(
             coordinator: Coordinator,
-            network: NetworkManager? = RemoteConfigManager.sharedInstance
+            network: NetworkManager? = RemoteConfigManager.shared
         ) {
             self.network = network
             self.coordinator = coordinator
@@ -72,14 +72,10 @@ extension MainView {
         
         // MARK: - Private
         private func getGroupedData(from books: [any Book]) -> [CategoryModel]? {
-            let temp = Dictionary(grouping: books, by: \.genre)
-            return temp.keys.sorted().compactMap { key in
-                if let values = temp[key] {
-                    return CategoryModel(title: key, items: values)
-                } else {
-                    return nil
+            return Dictionary(grouping: books, by: { $0.genre ?? "Genre" })
+                .compactMap { key, values in
+                    CategoryModel(title: key, items: values)
                 }
-            }
         }
     }
 }

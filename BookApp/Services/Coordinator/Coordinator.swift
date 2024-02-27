@@ -8,14 +8,6 @@
 import SwiftUI
 
 enum Page: Hashable, Identifiable {
-    static func == (lhs: Page, rhs: Page) -> Bool {
-        lhs.id == rhs.id
-    }
-    
-    func hash(into hasher: inout Hasher) {
-        hasher.combine(id)
-    }
-    
     case main
     case details(book: any Book, recommendationIDs: [Int]?)
     
@@ -25,9 +17,30 @@ enum Page: Hashable, Identifiable {
         case .details: "details"
         }
     }
+    
+    func hash(into hasher: inout Hasher) {
+        switch self {
+        case .main:
+            hasher.combine("main")
+        case let .details(book, recommendationIDs):
+            hasher.combine("details")
+            hasher.combine(book)
+            hasher.combine(recommendationIDs)
+        }
+    }
+    
+    static func == (lhs: Page, rhs: Page) -> Bool {
+        switch (lhs, rhs) {
+        case (.main, .main): return true
+        case let (.details(lhsBook, lhsRecommendationIDs), .details(rhsBook, rhsRecommendationIDs)):
+            return lhsBook.id == rhsBook.id && lhsRecommendationIDs == rhsRecommendationIDs
+        default:
+            return false
+        }
+    }
 }
 
-final class Coordinator: ObservableObject {    
+final class Coordinator: ObservableObject {
     @Published var path = NavigationPath()
     
     func push(page: Page) {

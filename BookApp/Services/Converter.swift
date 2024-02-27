@@ -8,21 +8,22 @@
 import Foundation
 
 enum Converter {
-    static func getStatisticBarModelsFrom(book: any Book) -> [StatisticBarModel] {
-        var result: [StatisticBarModel] = []
-        
-        if let views = book.views {
-            result.append(.init(title: views, subtitle: "Readers"))
-        }
-        if let likes = book.likes {
-            result.append(.init(title: likes, subtitle: "Likes"))
-        }
-        if let quotes = book.quotes {
-            result.append(.init(title: quotes, subtitle: "Quotes"))
-        }
+    struct StatisticType {
+        static let types: [(key: KeyPath<any Book, String?>, subtitle: String)] = [
+            (\.views, "Readers"),
+            (\.likes, "Likes"),
+            (\.quotes, "Quotes"),
+            (\.genre, "Genre")
+        ]
+    }
 
-        result.append(.init(title: book.genre, subtitle: "Genre"))
-        
-        return result
+    static func getStatisticBarModelsFrom(book: any Book) -> [StatisticBarModel] {
+        return StatisticType.types.compactMap { type in
+            if let value = book[keyPath: type.key] {
+                return StatisticBarModel(title: value, subtitle: type.subtitle)
+            } else {
+                return nil
+            }
+        }
     }
 }

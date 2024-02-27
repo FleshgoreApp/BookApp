@@ -26,7 +26,7 @@ struct BookEntity: Codable {
     let name: String?
     let author: String?
     let summary: String?
-    var genre: String = "Genre"
+    var genre: String?
     let coverUrl: String?
     let views: String?
     let likes: String?

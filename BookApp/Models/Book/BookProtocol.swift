@@ -12,7 +12,7 @@ protocol Book: Identifiable, Hashable {
     var name: String? { get }
     var author: String? { get }
     var summary: String? { get }
-    var genre: String { get }
+    var genre: String? { get }
     var coverUrl: String? { get }
     var views: String? { get }
     var likes: String? { get }

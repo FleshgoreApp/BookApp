@@ -10,6 +10,7 @@ final class ImageCache {
     typealias CacheType = NSCache<NSString, NSData>
     static let shared = ImageCache()
     
+    private let lock = NSLock()
     private lazy var cache: CacheType = {
         let cache = CacheType()
         cache.countLimit = 100
@@ -22,10 +23,14 @@ final class ImageCache {
     
     // MARK: - Open
     func object(forkey key: NSString) -> Data? {
-        cache.object(forKey: key) as? Data
+        lock.lock()
+        defer { lock.unlock() }
+        return cache.object(forKey: key) as Data?
     }
     
     func set(object: NSData, forKey key: NSString) {
+        lock.lock()
         cache.setObject(object, forKey: key)
+        lock.unlock()
     }
 }

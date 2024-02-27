@@ -12,7 +12,7 @@ struct BookModel: Book {
     let name: String?
     let author: String?
     let summary: String?
-    var genre: String
+    var genre: String?
     let coverUrl: String?
     let views: String?
     let likes: String?

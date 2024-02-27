@@ -5,19 +5,26 @@
 
 import Foundation
 
-struct ImageRetriver {
+struct ImageRetriever {
+    enum RetrieverError: Error {
+        case invalidURL
+        case networkError(Error)
+        case noData
+    }
+    
     func fetch(_ imgUrl: String) async throws -> Data {
         guard let url = URL(string: imgUrl) else {
-            throw RetriverError.invalidUrl
+            throw RetrieverError.invalidURL
         }
         
-        let (data, _) = try await URLSession.shared.data(from: url)
-        return data
-    }
-}
-
-private extension ImageRetriver {
-    enum RetriverError: Error {
-        case invalidUrl
+        do {
+            let (data, _) = try await URLSession.shared.data(from: url)
+            guard !data.isEmpty else {
+                throw RetrieverError.noData
+            }
+            return data
+        } catch {
+            throw RetrieverError.networkError(error)
+        }
     }
 }

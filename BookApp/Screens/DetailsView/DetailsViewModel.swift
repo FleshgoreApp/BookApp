@@ -26,7 +26,7 @@ extension DetailsView {
         init(
             coordinator: Coordinator,
             book: any Book, recommendationIDs: [Int]?,
-            network: NetworkManager? = RemoteConfigManager.sharedInstance
+            network: NetworkManager? = RemoteConfigManager.shared
         ) {
             self.coordinator = coordinator
             self.network = network

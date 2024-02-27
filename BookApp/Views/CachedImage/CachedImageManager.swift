@@ -8,7 +8,7 @@ import Foundation
 final class CachedImageManager: ObservableObject {
     // MARK: - Properties
     @Published private(set) var currentState: CurrentState?
-    private let imageRetriver = ImageRetriver()
+    private let imageRetriever = ImageRetriever()
     
     // MARK: - Open
     @MainActor
@@ -22,7 +22,7 @@ final class CachedImageManager: ObservableObject {
         }
         
         do {
-            let data = try await imageRetriver.fetch(imgUrl)
+            let data = try await imageRetriever.fetch(imgUrl)
             self.currentState = .success(data: data)
             cache.set(object: data as NSData, forKey: imgUrl as NSString)
         } catch {
