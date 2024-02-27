@@ -104,9 +104,13 @@ struct DetailsView: View {
             Group {
                 statisticBar
                     .padding(.vertical, 12)
+                    .animation(.none, value: UUID())
                 Divider()
-                summery
-                    .padding(.vertical, 16)
+                HStack {
+                    summery
+                        .padding(.vertical, 16)
+                    Spacer()
+                }
                 Divider()
             }
             .padding(.horizontal, 16)
